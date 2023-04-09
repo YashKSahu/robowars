@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import rospy
+from std_msgs.msg import Int32
+
+rospy.init_node("robot_control")
+velocity_publisher = rospy.Publisher("/cmd_vel", Int32, queue_size=1)
+
+def control():
+    rate = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown():
+        string = "------ Controls ------\n1=Forward, 2=Backward, 3=Left, 4=Right, 5=Stop\nEnter: "
+        velocity_logic = 'e'
+        try: 
+            velocity_logic = input(string)
+            logic_list = {'w':1,'s':2,'a':3,'d':4,'e':5}
+            if velocity_logic not in logic_list.keys():
+                raise Exception
+            
+            velocity_logic = logic_list[velocity_logic]
+        except:
+            velocity_logic = 5  #stop
+            # velocity_publisher.publish(velocity_logic)
+            print("** exception, stopping robot **\n")
+        velocity_publisher.publish(velocity_logic)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        control()
+    except rospy.ROSInterruptException or KeyboardInterrupt:
+        print("Exited")
+        pass
